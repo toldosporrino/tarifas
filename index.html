@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Precio de Toldos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Un gris claro para el fondo */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-lg">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Calculadora de Precio de Toldos</h1>
+
+        <!-- Tipo de Toldo -->
+        <div class="mb-5">
+            <label for="awningType" class="block text-gray-700 text-sm font-semibold mb-2">
+                Tipo de Toldo:
+            </label>
+            <select id="awningType" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out bg-white appearance-none pr-8">
+                <!-- Opciones se cargarán con JavaScript -->
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9l4.95 4.95z"/></svg>
+            </div>
+        </div>
+
+        <!-- Línea (Ancho) -->
+        <div class="mb-5">
+            <label for="linea" class="block text-gray-700 text-sm font-semibold mb-2">
+                Línea (metros):
+            </label>
+            <select id="linea" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out bg-white appearance-none pr-8">
+                <!-- Opciones se cargarán con JavaScript -->
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9l4.95 4.95z"/></svg>
+            </div>
+        </div>
+
+        <!-- Avance (Proyección) -->
+        <div class="mb-5">
+            <label for="avance" class="block text-gray-700 text-sm font-semibold mb-2">
+                Avance (metros):
+            </label>
+            <select id="avance" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out bg-white appearance-none pr-8">
+                <!-- Opciones se cargarán con JavaScript -->
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 6.757 7.586 5.343 9l4.95 4.95z"/></svg>
+            </div>
+        </div>
+
+        <!-- Opciones de Lacado -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                Lacado:
+            </label>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center">
+                    <input type="radio" id="lacadoBlanco" name="lacado" value="blanco" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" checked>
+                    <label for="lacadoBlanco" class="ml-2 text-gray-700">Blanco</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="radio" id="lacadoColor" name="lacado" value="color" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="lacadoColor" class="ml-2 text-gray-700">Color</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Extras (Motor, Viento, Sol) -->
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-semibold mb-2">
+                Extras:
+            </label>
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <input type="checkbox" id="motor" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="motor" class="ml-2 text-gray-700">Motor</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="viento" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="viento" class="ml-2 text-gray-700">Sensor de Viento</label>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="sol" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="sol" class="ml-2 text-gray-700">Sensor de Sol</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Precio Final -->
+        <div class="text-center mt-8">
+            <p class="text-xl font-semibold text-gray-800">Precio Estimado (sin IVA):</p>
+            <p id="finalPriceWithoutIVA" class="text-4xl font-extrabold text-blue-600 mt-2">0.00 €</p>
+            <p class="text-gray-600 text-sm mt-2">Precio Total (con IVA del 21%):</p>
+            <p id="finalPriceWithIVA" class="text-2xl font-bold text-gray-700">0.00 €</p>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="mt-8 pt-4 border-t border-gray-200 text-center text-gray-600 text-sm">
+            <p class="font-semibold mb-1">Información Importante:</p>
+            <p>Este precio es **orientativo y no vinculante**, quedando pendiente de la visita y confirmación de nuestros comerciales.</p>
+        </div>
+    </div>
+
+    <script>
+        // Datos de los toldos proporcionados por el usuario
+        const awningData = [
+            { type: "TOLDO SIN COFRE", linea: 3, avance: 2, blanco: 882, color: 927, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 3, avance: 2.5, blanco: 925, color: 975, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 4, avance: 2, blanco: 944, color: 989, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 4, avance: 2.5, blanco: 994, color: 1042, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 4, avance: 3, blanco: 1035, color: 1085, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 4, avance: 3.5, blanco: 1075, color: 1130, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 5, avance: 2, blanco: 1025, color: 1075, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 5, avance: 2.5, blanco: 1080, color: 1130, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 5, avance: 3, blanco: 1130, color: 1185, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 5, avance: 3.5, blanco: 1177, color: 1235, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 6, avance: 2, blanco: 1103, color: 1150, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 6, avance: 2.5, blanco: 1166, color: 1220, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 6, avance: 3, blanco: 1221, color: 1275, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO SIN COFRE", linea: 6, avance: 3.5, blanco: 1280, color: 1335, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 3, avance: 2, blanco: 1395, color: 1500, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 3, avance: 2.5, blanco: 1450, color: 1550, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 4, avance: 2, blanco: 1500, color: 1600, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 4, avance: 2.5, blanco: 1555, color: 1670, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 4, avance: 3, blanco: 1600, color: 1717, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 4, avance: 3.5, blanco: 1815, color: 1825, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 5, avance: 2, blanco: 1670, color: 1795, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 5, avance: 2.5, blanco: 1735, color: 1860, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 5, avance: 3, blanco: 1790, color: 1920, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 5, avance: 3.5, blanco: 2025, color: 2165, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 5, avance: 4, blanco: 2205, color: 2370, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 6, avance: 2, blanco: 2050, color: 2188, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 6, avance: 2.5, blanco: 2100, color: 2251, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 6, avance: 3, blanco: 2170, color: 2325, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 6, avance: 3.5, blanco: 2235, color: 2390, motor: 450, viento: 120, sol: 150 },
+            { type: "TOLDO CON COFRE", linea: 6, avance: 4, blanco: 2425, color: 2600, motor: 450, viento: 120, sol: 150 }
+        ];
+
+        // Obtener referencias a los elementos del DOM
+        const awningTypeSelect = document.getElementById('awningType');
+        const lineaSelect = document.getElementById('linea');
+        const avanceSelect = document.getElementById('avance');
+        const lacadoBlancoRadio = document.getElementById('lacadoBlanco');
+        const lacadoColorRadio = document.getElementById('lacadoColor');
+        const motorCheckbox = document.getElementById('motor');
+        const vientoCheckbox = document.getElementById('viento');
+        const solCheckbox = document.getElementById('sol');
+        const finalPriceWithoutIVADisplay = document.getElementById('finalPriceWithoutIVA');
+        const finalPriceWithIVADisplay = document.getElementById('finalPriceWithIVA');
+
+        // Constante para el IVA (21% en España)
+        const IVA_RATE = 0.21;
+
+        /**
+         * Rellena un elemento select con opciones únicas de una propiedad dada.
+         * @param {HTMLElement} selectElement - El elemento <select> a rellenar.
+         * @param {Array} data - El array de datos.
+         * @param {string} property - La propiedad de los objetos de datos de la que obtener los valores únicos.
+         */
+        function populateSelect(selectElement, data, property) {
+            selectElement.innerHTML = ''; // Limpiar opciones existentes
+            const uniqueValues = [...new Set(data.map(item => item[property]))].sort((a, b) => a - b);
+            uniqueValues.forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                selectElement.appendChild(option);
+            });
+        }
+
+        /**
+         * Actualiza las opciones de línea y avance basadas en el tipo de toldo seleccionado.
+         */
+        function updateLineAndAvanceOptions() {
+            const selectedType = awningTypeSelect.value;
+            const filteredByAwningType = awningData.filter(item => item.type === selectedType);
+
+            populateSelect(lineaSelect, filteredByAwningType, 'linea');
+            updateAvanceOptions(); // Llama a la función para actualizar el avance después de la línea
+        }
+
+        /**
+         * Actualiza las opciones de avance basadas en el tipo de toldo y la línea seleccionados.
+         */
+        function updateAvanceOptions() {
+            const selectedType = awningTypeSelect.value;
+            const selectedLinea = parseFloat(lineaSelect.value); // Convertir a número para comparación
+            const filteredByLineAndType = awningData.filter(item =>
+                item.type === selectedType && item.linea === selectedLinea
+            );
+            populateSelect(avanceSelect, filteredByLineAndType, 'avance');
+        }
+
+        /**
+         * Calcula el precio total del toldo basado en las selecciones del usuario.
+         */
+        function calculatePrice() {
+            const selectedType = awningTypeSelect.value;
+            const selectedLinea = parseFloat(lineaSelect.value);
+            const selectedAvance = parseFloat(avanceSelect.value);
+            const isLacadoBlanco = lacadoBlancoRadio.checked;
+
+            let basePrice = 0;
+            let foundMatch = false;
+
+            // Encontrar el precio base del toldo según el tipo, línea y avance
+            for (const item of awningData) {
+                if (item.type === selectedType && item.linea === selectedLinea && item.avance === selectedAvance) {
+                    basePrice = isLacadoBlanco ? item.blanco : item.color;
+                    foundMatch = true;
+                    break;
+                }
+            }
+
+            if (!foundMatch) {
+                finalPriceWithoutIVADisplay.textContent = 'N/A';
+                finalPriceWithIVADisplay.textContent = 'N/A';
+                return;
+            }
+
+            let totalCostWithoutIVA = basePrice;
+
+            // Sumar los extras si están seleccionados
+            if (motorCheckbox.checked) {
+                totalCostWithoutIVA += awningData[0].motor; // Asumimos que el precio del motor es constante
+            }
+            if (vientoCheckbox.checked) {
+                totalCostWithoutIVA += awningData[0].viento; // Asumimos que el precio del viento es constante
+            }
+            if (solCheckbox.checked) {
+                totalCostWithoutIVA += awningData[0].sol; // Asumimos que el precio del sol es constante
+            }
+
+            const totalCostWithIVA = totalCostWithoutIVA * (1 + IVA_RATE);
+
+            // Mostrar los precios finales
+            finalPriceWithoutIVADisplay.textContent = `${totalCostWithoutIVA.toFixed(2)} €`;
+            finalPriceWithIVADisplay.textContent = `${totalCostWithIVA.toFixed(2)} €`;
+        }
+
+        // --- Event Listeners ---
+        // Escuchar cambios en el tipo de toldo
+        awningTypeSelect.addEventListener('change', () => {
+            updateLineAndAvanceOptions();
+            calculatePrice();
+        });
+
+        // Escuchar cambios en la línea
+        lineaSelect.addEventListener('change', () => {
+            updateAvanceOptions();
+            calculatePrice();
+        });
+
+        // Escuchar cambios en el avance
+        avanceSelect.addEventListener('change', calculatePrice);
+
+        // Escuchar cambios en los radios de lacado
+        lacadoBlancoRadio.addEventListener('change', calculatePrice);
+        lacadoColorRadio.addEventListener('change', calculatePrice);
+
+        // Escuchar cambios en los checkboxes de extras
+        motorCheckbox.addEventListener('change', calculatePrice);
+        vientoCheckbox.addEventListener('change', calculatePrice);
+        solCheckbox.addEventListener('change', calculatePrice);
+
+        // --- Inicialización ---
+        // Cargar los tipos de toldo iniciales
+        populateSelect(awningTypeSelect, awningData, 'type');
+        // Actualizar las opciones de línea y avance al cargar la página
+        updateLineAndAvanceOptions();
+        // Calcular el precio inicial
+        calculatePrice();
+    </script>
+</body>
+</html>
