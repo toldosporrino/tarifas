@@ -103,6 +103,19 @@
             <p id="finalPriceWithIVA" class="text-2xl font-bold text-gray-700">0.00 €</p>
         </div>
 
+        <!-- Sección de Contacto para el Comercial (Simplificada) -->
+        <div class="mt-8 pt-4 border-t border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 text-center">¿Interesado en este toldo?</h2>
+            <p class="text-gray-700 text-sm mb-4 text-center">
+                Haga clic en el botón para enviar un correo pre-redactado a nuestro comercial.
+                <strong class="text-blue-600">Por favor, no olvide añadir su nombre y teléfono en el cuerpo del mensaje antes de enviarlo.</strong>
+            </p>
+
+            <button id="requestContactBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
+                Me Interesa
+            </button>
+        </div>
+
         <!-- Disclaimer -->
         <div class="mt-8 pt-4 border-t border-gray-200 text-center text-gray-600 text-sm">
             <p class="font-semibold mb-1">Información Importante:</p>
@@ -156,9 +169,15 @@
         const solCheckbox = document.getElementById('sol');
         const finalPriceWithoutIVADisplay = document.getElementById('finalPriceWithoutIVA');
         const finalPriceWithIVADisplay = document.getElementById('finalPriceWithIVA');
+        // Eliminados: clientNameInput y clientPhoneInput
+        const requestContactBtn = document.getElementById('requestContactBtn');
+
 
         // Constante para el IVA (21% en España)
         const IVA_RATE = 0.21;
+        // Dirección de correo del comercial a la que se enviará la solicitud
+        const COMMERCIAL_EMAIL = "administracion@toldosporrino.com"; // ¡IMPORTANTE: Reemplaza con el correo real de tu comercial!
+
 
         /**
          * Rellena un elemento select con opciones únicas de una propiedad dada.
@@ -247,7 +266,59 @@
             finalPriceWithIVADisplay.textContent = `${totalCostWithIVA.toFixed(2)} €`;
         }
 
-        // --- Event Listeners ---
+        /**
+         * Abre el cliente de correo del usuario con una solicitud de contacto pre-rellenada.
+         */
+        function requestContact() {
+            // Eliminado: validación de clientName y clientPhone
+
+            const awningType = awningTypeSelect.value;
+            const linea = lineaSelect.value;
+            const avance = avanceSelect.value;
+            const lacado = lacadoBlancoRadio.checked ? "Blanco" : "Color";
+            const motor = motorCheckbox.checked ? "Sí" : "No";
+            const viento = vientoCheckbox.checked ? "Sí" : "No";
+            const sol = solCheckbox.checked ? "Sí" : "No";
+            const priceWithoutIVA = finalPriceWithoutIVADisplay.textContent;
+            const priceWithIVA = finalPriceWithIVADisplay.textContent;
+
+            const subject = encodeURIComponent(`Interesado en Toldo (${awningType}) - Solicitud de contacto`);
+            
+            // Modificado: Nombre y Teléfono en negrita y con espacios en blanco
+            const body = encodeURIComponent(`
+Hola,
+
+Estoy interesado/a en un toldo con las siguientes características:
+
+- Tipo de Toldo: ${awningType}
+- Línea (metros): ${linea}
+- Avance (metros): ${avance}
+- Lacado: ${lacado}
+- Motor: ${motor}
+- Sensor de Viento: ${viento}
+- Sensor de Sol: ${sol}
+
+El precio estimado (sin IVA) es: ${priceWithoutIVA}
+El precio total (con IVA del 21%) es: ${priceWithIVA}
+
+Por favor, pónganse en contacto conmigo.
+
+Mis datos de contacto:
+**Nombre**: _________________________
+**Teléfono**: _________________________
+
+Gracias y un saludo.
+            `);
+
+            // Construir el enlace mailto:
+            const mailtoLink = `mailto:${COMMERCIAL_EMAIL}?subject=${subject}&body=${body}`;
+            
+            // Abrir el cliente de correo del usuario
+            window.location.href = mailtoLink;
+        }
+
+
+        // --- EventListeners ---
         // Escuchar cambios en el tipo de toldo
         awningTypeSelect.addEventListener('change', () => {
             updateLineAndAvanceOptions();
@@ -271,6 +342,10 @@
         motorCheckbox.addEventListener('change', calculatePrice);
         vientoCheckbox.addEventListener('change', calculatePrice);
         solCheckbox.addEventListener('change', calculatePrice);
+
+        // Escuchar clic en el botón de solicitud de contacto
+        requestContactBtn.addEventListener('click', requestContact);
+
 
         // --- Inicialización ---
         // Cargar los tipos de toldo iniciales
