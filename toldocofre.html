@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Precio Toldo Cofre</title>
+    <!-- Incluir Tailwind CSS para un estilo rápido y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fuentes Inter para una mejor legibilidad */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Fondo gris claro */
+        }
+        /* Estilos personalizados para los campos de entrada de texto/número y select */
+        input[type="text"], input[type="number"], select {
+            border: 1px solid #d1d5db; /* Borde gris */
+            border-radius: 0.5rem; /* Bordes redondeados */
+            padding: 0.75rem 1rem; /* Espaciado interno */
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #6366f1; /* Borde morado al enfocar */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Sombra suave */
+        }
+        /* Estilos para los checkboxes */
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: #6366f1; /* Color de acento morado para el checkbox */
+            width: 1.25rem; /* Tamaño del checkbox */
+            height: 1.25rem;
+            cursor: pointer;
+        }
+        /* Estilos para el botón */
+        button {
+            background-color: #6366f1; /* Fondo morado */
+            color: white; /* Texto blanco */
+            padding: 0.75rem 1.5rem; /* Espaciado interno */
+            border-radius: 0.5rem; /* Bordes redondeados */
+            font-weight: 600; /* Texto seminegrita */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            width: 100%; /* Ocupa todo el ancho */
+        }
+        button:hover {
+            background-color: #4f46e5; /* Morado más oscuro al pasar el ratón */
+            transform: translateY(-1px); /* Efecto de levantamiento */
+        }
+        button:active {
+            transform: translateY(0); /* Vuelve a la posición normal al hacer clic */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Precio Toldo Cofre</h1>
+        <div class="space-y-4">
+            <div>
+                <label for="linea" class="block text-gray-700 font-medium mb-1">Línea (metros):</label>
+                <input type="number" id="linea" placeholder="Ej: 3.5" class="input-field" step="0.01" min="0">
+            </div>
+            <div>
+                <label for="brazo" class="block text-gray-700 font-medium mb-1">Brazo (metros):</label>
+                <input type="number" id="brazo" placeholder="Ej: 2.0" class="input-field" step="0.01" min="0">
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="lacado" class="form-checkbox">
+                <label for="lacado" class="text-gray-700 font-medium">¿Es lacado?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="motor" class="form-checkbox">
+                <label for="motor" class="text-gray-700 font-medium">¿Lleva motor?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="sensorViento" class="form-checkbox">
+                <label for="sensorViento" class="text-gray-700 font-medium">¿Lleva sensor de viento?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="sensorSol" class="form-checkbox">
+                <label for="sensorSol" class="text-gray-700 font-medium">¿Lleva sensor de sol?</label>
+            </div>
+            <button onclick="calculateAwningPrice()">Calcular Precio</button>
+        </div>
+        <div id="result" class="mt-6 p-4 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-md text-center text-lg font-semibold hidden">
+            <!-- El resultado se mostrará aquí -->
+        </div>
+        <div id="errorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center hidden">
+            <!-- Mensajes de error se mostrarán aquí -->
+        </div>
+
+        <!-- Avisos adicionales -->
+        <div class="mt-8 text-center text-sm text-gray-600 space-y-2">
+            <p>A este precio hay que sumarle el IVA correspondiente.</p>
+            <p>Precio orientativo no vinculante, pendiente de visita y confirmación por parte de nuestros comerciales.</p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Datos completos de la tabla de precios de toldos.
+         * Las claves son la "línea" y los valores son un objeto con las "brazo" como claves
+         * y un objeto que contiene los precios `sinLacar` y `lacado`.
+         * Las tolerancias se usan para la comparación de números flotantes.
+         */
+        const PRECIOS_TOLDOS = {
+            3.05: {
+                1.5: { sinLacar: 731, lacado: 840.65 },
+                2: { sinLacar: 762, lacado: 876.3 },
+                2.5: { sinLacar: 801, lacado: 921.15 },
+            },
+            3.55: {
+                1.5: { sinLacar: 736, lacado: 846.4 },
+                2: { sinLacar: 767, lacado: 882.05 },
+                2.5: { sinLacar: 805, lacado: 925.75 },
+                3: { sinLacar: 849, lacado: 976.35 },
+            },
+            4.05: {
+                1.5: { sinLacar: 751, lacado: 863.65 },
+                2: { sinLacar: 786, lacado: 903.9 },
+                2.5: { sinLacar: 827, lacado: 951.05 },
+                3: { sinLacar: 873, lacado: 1003.95 },
+            },
+            4.55: {
+                1.5: { sinLacar: 844, lacado: 970.6 },
+                2: { sinLacar: 881, lacado: 1013.15 },
+                2.5: { sinLacar: 925, lacado: 1063.75 },
+                3: { sinLacar: 975, lacado: 1121.25 },
+            },
+            5.05: {
+                1.5: { sinLacar: 865, lacado: 994.75 },
+                2: { sinLacar: 905, lacado: 1040.75 },
+                2.5: { sinLacar: 951, lacado: 1093.65 },
+                3: { sinLacar: 1004, lacado: 1154.6 },
+            }
+        };
+
+        // Costes fijos para motor y sensores, según la tabla proporcionada
+        const COSTE_MOTOR = 260.00;
+        const COSTE_SENSOR_VIENTO = 61.00;
+        const COSTE_SENSOR_SOL = 75.00;
+        const MARGEN_VENTA = 0.80; // Margen del 80%
+
+        /**
+         * Función para encontrar los precios (sin lacar y lacado) en la tabla
+         * según la línea y el brazo. Si no se encuentra una coincidencia exacta,
+         * busca la siguiente medida superior.
+         * @param {number} linea La medida de la línea del toldo.
+         * @param {number} brazo La medida del brazo del toldo.
+         * @returns {object|null} Un objeto con { sinLacar, lacado } o null si no se encuentra.
+         */
+        function getPreciosBase(linea, brazo) {
+            const lineasDisponibles = Object.keys(PRECIOS_TOLDOS).map(Number).sort((a, b) => a - b);
+            const brazosDisponibles = Array.from(new Set(Object.values(PRECIOS_TOLDOS).flatMap(obj => Object.keys(obj).map(Number)))).sort((a, b) => a - b);
+
+            let lineaCoincidencia = null;
+            // Buscar la línea exacta o la inmediatamente superior
+            for (const l of lineasDisponibles) {
+                // Pequeña tolerancia para la comparación de flotantes (ej. 3.05 vs 3.0500000001)
+                if (linea <= l + 0.001) {
+                    lineaCoincidencia = l;
+                    break;
+                }
+            }
+
+            let brazoCoincidencia = null;
+            // Buscar el brazo exacto o el inmediatamente superior
+            for (const b of brazosDisponibles) {
+                // Pequeña tolerancia para la comparación de flotantes
+                if (brazo <= b + 0.001) {
+                    brazoCoincidencia = b;
+                    break;
+                }
+            }
+
+            if (lineaCoincidencia !== null && brazoCoincidencia !== null) {
+                const preciosPorLinea = PRECIOS_TOLDOS[lineaCoincidencia];
+                if (preciosPorLinea && preciosPorLinea[brazoCoincidencia]) {
+                    return preciosPorLinea[brazoCoincidencia];
+                }
+            }
+            return null; // No se encontró un conjunto de precios
+        }
+
+
+        /**
+         * Función principal para calcular el precio del toldo.
+         * Lee los valores de los campos de entrada, aplica la lógica de cálculo
+         * usando la tabla completa y muestra el resultado en la página.
+         */
+        function calculateAwningPrice() {
+            // Obtener los elementos HTML
+            const lineaInput = document.getElementById('linea');
+            const brazoInput = document.getElementById('brazo');
+            const lacadoCheckbox = document.getElementById('lacado');
+            const motorCheckbox = document.getElementById('motor');
+            const sensorVientoCheckbox = document.getElementById('sensorViento');
+            const sensorSolCheckbox = document.getElementById('sensorSol');
+            const resultDiv = document.getElementById('result');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            // Ocultar mensajes previos
+            resultDiv.classList.add('hidden');
+            errorMessageDiv.classList.add('hidden');
+            errorMessageDiv.textContent = ''; // Limpiar mensaje de error anterior
+
+            // Obtener los valores y convertirlos a número
+            const linea = parseFloat(lineaInput.value);
+            const brazo = parseFloat(brazoInput.value);
+            const isLacado = lacadoCheckbox.checked;
+            const hasMotor = motorCheckbox.checked;
+            const hasSensorViento = sensorVientoCheckbox.checked;
+            const hasSensorSol = sensorSolCheckbox.checked;
+
+            // Validar las entradas de línea y brazo
+            if (isNaN(linea) || linea <= 0) {
+                errorMessageDiv.textContent = 'Por favor, introduce un valor numérico válido y positivo para "Línea".';
+                errorMessageDiv.classList.remove('hidden');
+                lineaInput.focus();
+                return;
+            }
+
+            if (isNaN(brazo) || brazo <= 0) {
+                errorMessageDiv.textContent = 'Por favor, introduce un valor numérico válido y positivo para "Brazo".';
+                errorMessageDiv.classList.remove('hidden');
+                brazoInput.focus();
+                return;
+            }
+
+            // Obtener los precios base (sin lacar y lacado) de la tabla
+            const preciosBase = getPreciosBase(linea, brazo);
+
+            if (preciosBase === null) {
+                errorMessageDiv.textContent = 'No se encontró un precio base para las medidas introducidas. Por favor, verifica las dimensiones o introduce medidas dentro del rango de la tabla.';
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Inicializar el precio de COSTE con el precio base adecuado (lacado o sin lacar)
+            let precioCoste = isLacado ? preciosBase.lacado : preciosBase.sinLacar;
+
+            // Añadir costes adicionales fijos al precio de COSTE
+            if (hasMotor) {
+                precioCoste += COSTE_MOTOR;
+            }
+            if (hasSensorViento) {
+                precioCoste += COSTE_SENSOR_VIENTO;
+            }
+            if (hasSensorSol) {
+                precioCoste += COSTE_SENSOR_SOL;
+            }
+
+            // Calcular el precio de venta aplicando el margen
+            const precioVenta = precioCoste * (1 + MARGEN_VENTA);
+
+            // Mostrar solo el precio de venta formateado
+            resultDiv.textContent = `El precio de VENTA estimado es: €${precioVenta.toFixed(2)}`;
+            resultDiv.classList.remove('hidden'); // Mostrar el div del resultado
+        }
+    </script>
+</body>
+</html>
