@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarifa Toldos Brazo Articulado (Normal y Cofre)</title>
+    <!-- Incluir Tailwind CSS para un estilo rápido y responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Fuentes Inter para una mejor legibilidad */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Fondo gris claro */
+        }
+        /* Estilos personalizados para los campos de entrada de texto/número y select */
+        input[type="text"], input[type="number"], select {
+            border: 1px solid #d1d5db; /* Borde gris */
+            border-radius: 0.5rem; /* Bordes redondeados */
+            padding: 0.75rem 1rem; /* Espaciado interno */
+            width: 100%;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #6366f1; /* Borde morado al enfocar */
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Sombra suave */
+        }
+        /* Estilos para los checkboxes */
+        input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: #6366f1; /* Color de acento morado para el checkbox */
+            width: 1.25rem; /* Tamaño del checkbox */
+            height: 1.25rem;
+            cursor: pointer;
+        }
+        /* Estilos para el botón */
+        button {
+            background-color: #6366f1; /* Fondo morado */
+            color: white; /* Texto blanco */
+            padding: 0.75rem 1.5rem; /* Espaciado interno */
+            border-radius: 0.5rem; /* Bordes redondeados */
+            font-weight: 600; /* Texto seminegrita */
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+            width: 100%; /* Ocupa todo el ancho */
+        }
+        button:hover {
+            background-color: #4f46e5; /* Morado más oscuro al pasar el ratón */
+            transform: translateY(-1px); /* Efecto de levantamiento */
+        }
+        button:active {
+            transform: translateY(0); /* Vuelve a la posición normal al hacer clic */
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">Tarifa Toldos Brazo Articulado (Normal y Cofre)</h1>
+        <div class="space-y-4">
+            <div>
+                <label for="tipoToldo" class="block text-gray-700 font-medium mb-1">Tipo de Toldo:</label>
+                <select id="tipoToldo" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <option value="TOLDO BRAZO ARTICULADO">Toldo Brazo Articulado</option>
+                    <option value="TOLDO COFRE">Toldo Cofre</option>
+                </select>
+            </div>
+            <div>
+                <label for="linea" class="block text-gray-700 font-medium mb-1">Línea (metros):</label>
+                <input type="number" id="linea" placeholder="Ej: 3.5" class="input-field" step="0.01" min="0">
+            </div>
+            <div>
+                <label for="brazo" class="block text-gray-700 font-medium mb-1">Avance/Brazo (metros):</label>
+                <input type="number" id="brazo" placeholder="Ej: 2.0" class="input-field" step="0.01" min="0">
+            </div>
+            <div>
+                <label for="tipoLacado" class="block text-gray-700 font-medium mb-1">Tipo de Lacado:</label>
+                <select id="tipoLacado" class="block appearance-none bg-white border border-gray-300 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-indigo-500">
+                    <option value="sinLacar">Sin Lacar</option>
+                    <option value="lacadoBlanco">Lacado Blanco</option>
+                    <option value="lacadoColor">Lacado Color</option>
+                </select>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="motor" class="form-checkbox">
+                <label for="motor" class="text-gray-700 font-medium">¿Lleva motor?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="sensorViento" class="form-checkbox">
+                <label for="sensorViento" class="text-gray-700 font-medium">¿Lleva sensor de viento?</label>
+            </div>
+            <div class="flex items-center">
+                <input type="checkbox" id="sensorSol" class="form-checkbox">
+                <label for="sensorSol" class="text-gray-700 font-medium">¿Lleva sensor de sol?</label>
+            </div>
+            <button onclick="calculateAwningPrice()">Calcular Precio</button>
+        </div>
+        <div id="result" class="mt-6 p-4 bg-indigo-50 border border-indigo-200 text-indigo-800 rounded-md text-center text-lg font-semibold hidden">
+            <!-- El resultado se mostrará aquí -->
+        </div>
+        <div id="errorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md text-center hidden">
+            <!-- Mensajes de error se mostrarán aquí -->
+        </div>
+
+        <!-- Avisos adicionales -->
+        <div class="mt-8 text-center text-sm text-gray-600 space-y-2">
+            <p>A este precio hay que sumarle el IVA correspondiente.</p>
+            <p>Precio orientativo no vinculante, pendiente de visita y confirmación por parte de nuestros comerciales.</p>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Datos completos de la tabla de precios de toldos.
+         * Cada clave de nivel superior es el `tipo de toldo`.
+         * Dentro de cada tipo, la estructura es:
+         * `linea`: { `brazo`: { `sinLacar`: precio, `lacadoBlanco`: precio, `lacadoColor`: precio, `motor`: coste, `sensorViento`: coste, `sensorSol`: coste } }
+         * NOTA: Los precios de `sinLacar`, `lacadoBlanco` y `lacadoColor` ya son el precio de venta final.
+         * Los costes de `motor`, `sensorViento`, `sensorSol` son adicionales a ese precio base.
+         * Las tolerancias se usan para la comparación de números flotantes.
+         */
+        const ALL_PRECIOS_TOLDOS = {
+            "TOLDO BRAZO ARTICULADO": {
+                // LINEA 3
+                3: {
+                    2: { sinLacar: 882, lacadoBlanco: 892, lacadoColor: 927, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 925, lacadoBlanco: 975, lacadoColor: 975, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 944, lacadoBlanco: 989, lacadoColor: 989, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 1035, lacadoBlanco: 1085, lacadoColor: 1085, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    4: { sinLacar: 1075, lacadoBlanco: 1130, lacadoColor: 1130, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 4
+                4: {
+                    2: { sinLacar: 994, lacadoBlanco: 1042, lacadoColor: 1042, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 1075, lacadoBlanco: 1075, lacadoColor: 1075, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 1080, lacadoBlanco: 1130, lacadoColor: 1130, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 1130, lacadoBlanco: 1185, lacadoColor: 1185, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    4: { sinLacar: 1130, lacadoBlanco: 1185, lacadoColor: 1185, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 5
+                5: {
+                    2: { sinLacar: 1103, lacadoBlanco: 1150, lacadoColor: 1150, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 1166, lacadoBlanco: 1220, lacadoColor: 1220, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 1221, lacadoBlanco: 1275, lacadoColor: 1275, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 1280, lacadoBlanco: 1335, lacadoColor: 1335, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    4: { sinLacar: 1395, lacadoBlanco: 1500, lacadoColor: 1500, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 6
+                6: {
+                    2: { sinLacar: 2050, lacadoBlanco: 2188, lacadoColor: 2188, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 2100, lacadoBlanco: 2251, lacadoColor: 2251, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 2170, lacadoBlanco: 2325, lacadoColor: 2325, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 2235, lacadoBlanco: 2390, lacadoColor: 2390, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    4: { sinLacar: 2425, lacadoBlanco: 2600, lacadoColor: 2600, motor: 450, sensorViento: 120, sensorSol: 150 },
+                }
+            },
+            "TOLDO COFRE": {
+                // LINEA 3
+                3: {
+                    2: { sinLacar: 1395, lacadoBlanco: 1500, lacadoColor: 1550, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 1450, lacadoBlanco: 1550, lacadoColor: 1600, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 4
+                4: {
+                    2: { sinLacar: 1500, lacadoBlanco: 1600, lacadoColor: 1650, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 1555, lacadoBlanco: 1670, lacadoColor: 1710, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 1600, lacadoBlanco: 1717, lacadoColor: 1765, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 1815, lacadoBlanco: 1825, lacadoColor: 1875, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 5
+                5: {
+                    2: { sinLacar: 1670, lacadoBlanco: 1795, lacadoColor: 1845, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 1735, lacadoBlanco: 1860, lacadoColor: 1910, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 1790, lacadoBlanco: 1920, lacadoColor: 1970, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 2025, lacadoBlanco: 2165, lacadoColor: 2220, motor: 450, sensorViento: 120, sensorSol: 150 },
+                },
+                // LINEA 6
+                6: {
+                    2: { sinLacar: 2205, lacadoBlanco: 2370, lacadoColor: 2435, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    2.5: { sinLacar: 2050, lacadoBlanco: 2188, lacadoColor: 2251, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3: { sinLacar: 2100, lacadoBlanco: 2251, lacadoColor: 2325, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    3.5: { sinLacar: 2170, lacadoBlanco: 2325, lacadoColor: 2390, motor: 450, sensorViento: 120, sensorSol: 150 },
+                    4: { sinLacar: 2235, lacadoBlanco: 2390, lacadoColor: 2435, motor: 450, sensorViento: 120, sensorSol: 150 },
+                }
+            }
+        };
+
+        /**
+         * Función para encontrar los precios base y costes adicionales en la tabla
+         * según el tipo de toldo, la línea y el brazo.
+         * Si no se encuentra una coincidencia exacta, busca la siguiente medida superior.
+         * @param {string} tipoToldo El tipo de toldo seleccionado (ej. "TOLDO COFRE").
+         * @param {number} linea La medida de la línea del toldo.
+         * @param {number} brazo La medida del brazo del toldo.
+         * @returns {object|null} Un objeto con los precios `sinLacar`, `lacadoBlanco`, `lacadoColor` y costes de accesorios, o null si no se encuentra.
+         */
+        function getPreciosYCostes(tipoToldo, linea, brazo) {
+            const preciosPorTipo = ALL_PRECIOS_TOLDOS[tipoToldo];
+            if (!preciosPorTipo) {
+                return null; // El tipo de toldo no existe en los datos
+            }
+
+            const lineasDisponibles = Object.keys(preciosPorTipo).map(Number).sort((a, b) => a - b);
+            
+            // Recoger todos los brazos disponibles para el tipo de toldo seleccionado
+            const brazosDisponibles = Array.from(new Set(
+                Object.values(preciosPorTipo).flatMap(obj => Object.keys(obj).map(Number))
+            )).sort((a, b) => a - b);
+
+            let lineaCoincidencia = null;
+            for (const l of lineasDisponibles) {
+                // Pequeña tolerancia para la comparación de flotantes
+                if (linea <= l + 0.001) {
+                    lineaCoincidencia = l;
+                    break;
+                }
+            }
+
+            let brazoCoincidencia = null;
+            for (const b of brazosDisponibles) {
+                // Pequeña tolerancia para la comparación de flotantes
+                if (brazo <= b + 0.001) {
+                    brazoCoincidencia = b;
+                    break;
+                }
+            }
+
+            if (lineaCoincidencia !== null && brazoCoincidencia !== null) {
+                const datosPorLinea = preciosPorTipo[lineaCoincidencia];
+                if (datosPorLinea && datosPorLinea[brazoCoincidencia]) {
+                    return datosPorLinea[brazoCoincidencia];
+                }
+            }
+            return null; // No se encontró un conjunto de precios y costes
+        }
+
+
+        /**
+         * Función principal para calcular el precio de venta del toldo.
+         * Lee los valores de los campos de entrada, aplica la lógica de cálculo
+         * usando la tabla de precios de venta final y muestra el resultado en la página.
+         */
+        function calculateAwningPrice() {
+            // Obtener los elementos HTML
+            const tipoToldoSelect = document.getElementById('tipoToldo');
+            const lineaInput = document.getElementById('linea');
+            const brazoInput = document.getElementById('brazo');
+            const tipoLacadoSelect = document.getElementById('tipoLacado'); // Nuevo select para tipo de lacado
+            const motorCheckbox = document.getElementById('motor');
+            const sensorVientoCheckbox = document.getElementById('sensorViento');
+            const sensorSolCheckbox = document.getElementById('sensorSol');
+            const resultDiv = document.getElementById('result');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            // Ocultar mensajes previos
+            resultDiv.classList.add('hidden');
+            errorMessageDiv.classList.add('hidden');
+            errorMessageDiv.textContent = ''; // Limpiar mensaje de error anterior
+
+            // Obtener los valores
+            const tipoToldo = tipoToldoSelect.value;
+            const linea = parseFloat(lineaInput.value);
+            const brazo = parseFloat(brazoInput.value);
+            const tipoLacado = tipoLacadoSelect.value; // Obtener el tipo de lacado
+            const hasMotor = motorCheckbox.checked;
+            const hasSensorViento = sensorVientoCheckbox.checked;
+            const hasSensorSol = sensorSolCheckbox.checked;
+
+            // Validar las entradas de línea y brazo
+            if (isNaN(linea) || linea <= 0) {
+                errorMessageDiv.textContent = 'Por favor, introduce un valor numérico válido y positivo para "Línea".';
+                errorMessageDiv.classList.remove('hidden');
+                lineaInput.focus();
+                return;
+            }
+
+            if (isNaN(brazo) || brazo <= 0) {
+                errorMessageDiv.textContent = 'Por favor, introduce un valor numérico válido y positivo para "Avance/Brazo".';
+                errorMessageDiv.classList.remove('hidden');
+                brazoInput.focus();
+                return;
+            }
+
+            // Obtener los precios base y costes de accesorios de la tabla para el tipo de toldo seleccionado
+            const datosToldo = getPreciosYCostes(tipoToldo, linea, brazo);
+
+            if (datosToldo === null) {
+                errorMessageDiv.textContent = `No se encontró un precio para las medidas introducidas (${linea}m x ${brazo}m) para el tipo de toldo "${tipoToldoSelect.options[tipoToldoSelect.selectedIndex].text}". Por favor, verifica las dimensiones o introduce medidas dentro del rango de la tabla.`;
+                errorMessageDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Inicializar el precio de venta con el precio base adecuado (sin lacar, lacado blanco o lacado color)
+            let precioVenta = 0;
+            switch(tipoLacado) {
+                case 'sinLacar':
+                    precioVenta = datosToldo.sinLacar;
+                    break;
+                case 'lacadoBlanco':
+                    precioVenta = datosToldo.lacadoBlanco;
+                    break;
+                case 'lacadoColor':
+                    precioVenta = datosToldo.lacadoColor;
+                    break;
+                default:
+                    errorMessageDiv.textContent = 'Tipo de lacado no válido.';
+                    errorMessageDiv.classList.remove('hidden');
+                    return;
+            }
+            
+            // Añadir costes adicionales fijos de los accesorios (estos ya son precios de venta)
+            if (hasMotor) {
+                precioVenta += datosToldo.motor;
+            }
+            if (hasSensorViento) {
+                precioVenta += datosToldo.sensorViento;
+            }
+            if (hasSensorSol) {
+                precioVenta += datosToldo.sensorSol;
+            }
+
+            // Mostrar solo el precio de venta formateado
+            resultDiv.textContent = `El precio de VENTA estimado es: €${precioVenta.toFixed(2)}`;
+            resultDiv.classList.remove('hidden'); // Mostrar el div del resultado
+        }
+    </script>
+</body>
+</html>
